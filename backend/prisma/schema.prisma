@@ -1,0 +1,59 @@
+// schema.prisma
+
+datasource db {
+  provider = "mysql" // or another database, e.g., "mysql", "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id                    Int       @id @default(autoincrement())
+  name                  String
+  email                 String    @unique
+  emailVerified         Boolean   @default(false)
+  createdAt             DateTime  @default(now())
+  attemptedQuizQuestions Question[] @relation("QuizAttempts")
+  attemptedExamsQuestions Question[] @relation("ExamAttempts")
+  selectedPaymentPlan   PaymentPlan? @relation(fields: [paymentPlanId], references: [id])
+  paymentPlanId         Int?
+  paymentPlanPurchasedAt DateTime?
+}
+
+model Question {
+  id           Int      @id @default(autoincrement())
+  statement    String
+  optionA      String
+  optionB      String
+  optionC      String
+  optionD      String
+  answer       String
+  subjectId    Int
+  subject      Subject @relation(fields: [subjectId], references: [id])
+  isQuiz       Boolean // true for quiz, false for exam
+  UserQuiz     User[]  @relation("QuizAttempts")
+  UserExam     User[]  @relation("ExamAttempts")
+}
+
+model Course {
+  id           Int      @id @default(autoincrement())
+  name         String
+  subjects     Subject[]
+}
+
+model Subject {
+  id        Int       @id @default(autoincrement())
+  name      String
+  courseId  Int
+  course    Course    @relation(fields: [courseId], references: [id])
+  questions Question[]
+}
+
+model PaymentPlan {
+  id        Int      @id @default(autoincrement())
+  price     Decimal
+  duration  String // e.g., "1 month", "1 year"
+  User      User[]
+}
