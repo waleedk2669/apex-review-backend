@@ -14,6 +14,7 @@ model User {
   name                  String
   email                 String    @unique
   emailVerified         Boolean   @default(false)
+  password              String
   createdAt             DateTime  @default(now())
   attemptedQuizQuestions Question[] @relation("QuizAttempts")
   attemptedExamsQuestions Question[] @relation("ExamAttempts")
